@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/yutthapichai/gRPC-go/greetpb"
+	"github.com/yutthapichai/gRPC-go/Greet/greetpb"
 
 	"google.golang.org/grpc"
 )

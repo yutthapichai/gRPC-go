@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/yutthapichai/gRPC-go/Calculator/calpb/calculatorpb"
 	"google.golang.org/grpc"
 )
 
@@ -19,7 +20,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	// calculatorpb..RegisterGreetServiceServer(s, &server{})
+	calculatorpb.RegisterCalculatorServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve %v", err)
