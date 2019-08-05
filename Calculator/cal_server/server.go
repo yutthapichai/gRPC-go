@@ -11,7 +11,7 @@ import (
 type server struct{}
 
 func main() {
-	fmt.Println("Hello world")
+	fmt.Println("Calculator server")
 
 	lis, err := net.Listen("tcp", "0.0.0.0:50023")
 	if err != nil {
@@ -19,5 +19,9 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	// greetpb.RegisterGreeterServiceServer(&s, &server{})
+	// calculatorpb..RegisterGreetServiceServer(s, &server{})
+
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve %v", err)
+	}
 }
