@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/yutthapichai/gRPC-go/Calculator/calpb"
 
@@ -21,6 +22,25 @@ func (*server) Sum(ctx context.Context, req *calpb.SumRequest) (*calpb.SumRespon
 		SumResult: firstNumber + secondNumber,
 	}
 	return res, nil
+}
+
+func (*server) SumMany(req *calpb.SumManyRequest, stream calpb.CalculatorService_SumManyServer) error {
+	fmt.Printf("Calculate function was invoked with %v\n", req)
+	k := req.GetK()
+	N := req.GetN()
+	for N > 1 {
+		if N%k == 0 {
+			res := &calpb.SumManyRespone{
+				Result: k,
+			}
+			N = N / k
+			stream.Send(res)
+			time.Sleep(1000 * time.Millisecond)
+		} else {
+			k = k + 1
+		}
+	}
+	return nil
 }
 
 func main() {
