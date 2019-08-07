@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -41,6 +42,28 @@ func (*server) SumMany(req *calpb.SumManyRequest, stream calpb.CalculatorService
 		}
 	}
 	return nil
+}
+
+func (*server) SumLong(stream calpb.CalculatorService_SumLongServer) error {
+	fmt.Printf("Starting to do Streaming RPC..\n")
+	sum := int32(0)
+	count := 0
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			average := float64(sum) / float64(count)
+			return stream.SendAndClose(&calpb.SumLongRespone{
+				LongResult: average,
+			})
+		}
+		if err != nil {
+			log.Printf("Error reading streaming from greet: %v", err)
+		}
+		log.Printf("Respone from amount Long time %v\n", req.GetN())
+		sum += req.GetN()
+		count++
+	}
+
 }
 
 func main() {

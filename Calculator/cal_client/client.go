@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/yutthapichai/gRPC-go/Calculator/calpb"
 
@@ -23,7 +24,8 @@ func main() {
 	c := calpb.NewCalculatorServiceClient(cc)
 	// fmt.Printf("Created client: %f", c)
 	// doUnary(c)
-	doStreaming(c)
+	// doStreaming(c)
+	doClientStreaming(c)
 }
 
 func doUnary(c calpb.CalculatorServiceClient) {
@@ -61,4 +63,27 @@ func doStreaming(c calpb.CalculatorServiceClient) {
 		}
 		log.Printf("Respone from calculate many time %v", msg.GetResult())
 	}
+}
+
+func doClientStreaming(c calpb.CalculatorServiceClient) {
+	fmt.Println("Starting to do client streaming RPC...")
+	number := []int32{2, 4, 6, 8}
+	stream, err := c.SumLong(context.Background())
+	if err != nil {
+		log.Printf("Error reading streaming to server %v\n", err)
+	}
+
+	for _, req := range number {
+		log.Printf("Starting req ...%v\n", req)
+		stream.Send(&calpb.SumLongRequest{
+			N: req,
+		})
+		time.Sleep(1000 * time.Millisecond)
+	}
+
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Printf("Error receiving streaming %v\n", err)
+	}
+	fmt.Printf("Result Long Calculate Respone Average is %v\n", res)
 }
