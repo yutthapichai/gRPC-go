@@ -25,7 +25,8 @@ func main() {
 	// fmt.Printf("Created client: %f", c)
 	// doUnary(c)
 	// doStreaming(c)
-	doClientStreaming(c)
+	// doClientStreaming(c)
+	clientStreamToServerStreaming(c)
 }
 
 func doUnary(c calpb.CalculatorServiceClient) {
@@ -86,4 +87,47 @@ func doClientStreaming(c calpb.CalculatorServiceClient) {
 		log.Printf("Error receiving streaming %v\n", err)
 	}
 	fmt.Printf("Result Long Calculate Respone Average is %v\n", res)
+}
+
+func clientStreamToServerStreaming(c calpb.CalculatorServiceClient) {
+	fmt.Println("Starting to do client streaming  to server streaming  RPC...")
+
+	stream, err := c.SumEveryOne(context.Background())
+	if err != nil {
+		log.Printf("Error reading streaming to server %v\n", err)
+	}
+
+	requests := []int32{1, 5, 3, 6, 2, 20}
+
+	waitc := make(chan int32)
+
+	go func() {
+		// function to send message
+		for _, req := range requests {
+			fmt.Printf("Client streaming sending number to server streaming : %v\n", req)
+			stream.Send(&calpb.SumEveryOneRequest{
+				N: req,
+			})
+			time.Sleep(1000 * time.Millisecond)
+		}
+		stream.CloseSend()
+	}()
+
+	go func() {
+		// function to receive
+		for {
+			req, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Printf("Error whlie reveiving: %v\n", err)
+				break
+			}
+			fmt.Printf("Received maximum is: %v\n", req.GetResult())
+		}
+		close(waitc)
+	}()
+	// block everting until is done
+	<-waitc
 }

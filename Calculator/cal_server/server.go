@@ -66,6 +66,42 @@ func (*server) SumLong(stream calpb.CalculatorService_SumLongServer) error {
 
 }
 
+func (*server) SumEveryOne(stream calpb.CalculatorService_SumEveryOneServer) error {
+	fmt.Printf("starting to client streaming and server streaming\n")
+	maximum := int32(0)
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			log.Printf("Error while reading client: %v", err)
+			return err
+		}
+		number := req.GetN()
+		if number > maximum {
+			maximum = number
+			errError := stream.Send(&calpb.SumEveryOneResponse{
+				Result: maximum,
+			})
+
+			if errError != nil {
+				log.Printf("Error while sending data to client %v", err)
+				return err
+			}
+		} else {
+			errError := stream.Send(&calpb.SumEveryOneResponse{
+				Result: maximum,
+			})
+
+			if errError != nil {
+				log.Printf("Error while sending data to client %v", err)
+				return err
+			}
+		}
+	}
+}
+
 func main() {
 	fmt.Println("Calculator server")
 

@@ -29,10 +29,20 @@ message SumLongRespone {
     double long_result = 1;
 }
 
+message SumEveryOneRequest {
+    int32 N = 1;
+}
+
+message SumEveryOneResponse {
+    int32 result = 1;
+}
+
 service CalculatorService {
     rpc Sum(SumRequest) returns (SumRespone) {}
 
     rpc SumMany (SumManyRequest) returns (stream SumManyRespone) {}
 
     rpc SumLong (stream SumLongRequest) returns (SumLongRespone) {}
+
+    rpc SumEveryOne (stream SumEveryOneRequest) returns (stream SumEveryOneResponse) {}
 }
